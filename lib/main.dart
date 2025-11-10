@@ -179,3 +179,200 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+class RegisterEmailSection extends StatefulWidget {
+  RegisterEmailSection({Key? key, required this.auth}) : super(key: key);
+  final FirebaseAuth auth;
+
+  @override
+  _RegisterEmailSectionState createState() => _RegisterEmailSectionState();
+}
+
+// [cite: 68]
+class _RegisterEmailSectionState extends State<RegisterEmailSection> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // [cite: 68]
+  final TextEditingController _emailController = TextEditingController(); // [cite: 69]
+  final TextEditingController _passwordController = TextEditingController(); // [cite: 69]
+  bool _success = false; // [cite: 69]
+  bool _initialState = true; // [cite: 69]
+  String? _userEmail; // [cite: 69]
+
+  void _register() async { // [cite: 70]
+    try {
+      await widget.auth.createUserWithEmailAndPassword( // [cite: 70]
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      setState(() { // [cite: 71]
+        _success = true;
+        _userEmail = _emailController.text;
+        _initialState = false;
+      });
+      // Login is automatic upon successful registration,
+      // so AuthWrapper will navigate to ProfileScreen.
+    } catch (e) {
+      setState(() { // [cite: 72]
+        _success = false;
+        _initialState = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form( // [cite: 73]
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          TextFormField( // [cite: 73]
+            controller: _emailController,
+            decoration: InputDecoration(labelText: 'Email'),
+            validator: (value) {
+              if (value?.isEmpty ?? true) { // [cite: 74]
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          TextFormField( // [cite: 74]
+            controller: _passwordController,
+            decoration: InputDecoration(labelText: 'Password'),
+            obscureText: true, // Good practice to hide password
+            validator: (value) {
+              if (value?.isEmpty ?? true) { // [cite: 75]
+                return 'Please enter some text';
+              }
+              if (value!.length < 6) { // [cite: 40]
+                 return 'Password should be 6 characters or more';
+              }
+              return null;
+            },
+          ),
+          Container( // [cite: 76]
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            alignment: Alignment.center,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) { // [cite: 77]
+                  _register();
+                }
+              },
+              child: Text('Submit'), // [cite: 78]
+            ),
+          ),
+          Container( // [cite: 78]
+            alignment: Alignment.center,
+            child: Text( // [cite: 79]
+              _initialState
+                  ? 'Please Register'
+                  : _success
+                      ? 'Successfully registered $_userEmail'
+                      : 'Registration failed',
+              style: TextStyle(color: _success ? Colors.green : Colors.red), // [cite: 79]
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class EmailPasswordForm extends StatefulWidget {
+  EmailPasswordForm({Key? key, required this.auth}) : super(key: key);
+  final FirebaseAuth auth;
+
+  @override
+  _EmailPasswordFormState createState() => _EmailPasswordFormState();
+}
+
+class _EmailPasswordFormState extends State<EmailPasswordForm> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // [cite: 82]
+  final TextEditingController _emailController = TextEditingController(); // [cite: 83]
+  final TextEditingController _passwordController = TextEditingController(); // [cite: 83]
+  bool _success = false; // [cite: 83]
+  bool _initialState = true; // [cite: 83]
+  String _userEmail = ''; // [cite: 84]
+
+  void _signInWithEmailAndPassword() async { // [cite: 84]
+    try {
+      await widget.auth.signInWithEmailAndPassword( // [cite: 84]
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      setState(() { // [cite: 85]
+        _success = true;
+        _userEmail = _emailController.text;
+        _initialState = false;
+      });
+      // Successful sign-in will be detected by AuthWrapper,
+      // which will navigate to ProfileScreen.
+    } catch (e) {
+      setState(() { // [cite: 86]
+        _success = false;
+        _initialState = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Container(
+            child: Text('Test sign in with email and password'),
+            padding: const EdgeInsets.all(16),
+            alignment: Alignment.center,
+          ),
+          TextFormField( 
+            controller: _emailController,
+            decoration: InputDecoration(labelText: 'Email'),
+            validator: (value) {
+              if (value?.isEmpty ?? true) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          TextFormField(
+            controller: _passwordController,
+            decoration: InputDecoration(labelText: 'Password'),
+            obscureText: true, // Good practice to hide password
+            validator: (value) { 
+              if (value?.isEmpty ?? true) {
+                return 'Please enter some text';
+              }
+              return null;
+            },
+          ),
+          Container( 
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            alignment: Alignment.center, 
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  _signInWithEmailAndPassword();
+                }
+              },
+              child: Text('Submit'),
+            ),
+          ),
+          Container( 
+            alignment: Alignment.center,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text( 
+              _initialState
+                  ? 'Please sign in'
+                  : _success
+                      ? 'Successfully signed in $_userEmail'
+                      : 'Sign in failed',
+              style: TextStyle(color: _success ? Colors.green : Colors.red), // [cite: 94]
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
