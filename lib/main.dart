@@ -116,6 +116,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _setupFirebaseMessaging() {
     messaging = FirebaseMessaging.instance;
     messaging.subscribeToTopic("messaging");
+    messaging.getToken().then((value) {
+      print("--- YOUR FCM TOKEN ---");
+      print(value);
+      print("----------------------");
+    });
 
     // This handles notifications when the app is IN THE FOREGROUND
     FirebaseMessaging.onMessage.listen((RemoteMessage event) {
